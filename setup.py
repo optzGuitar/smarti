@@ -7,4 +7,6 @@ setup(
     author="optzGuitar",
     url="https://github.com/optzGuitar/smarti",
     packages=["smarti"],
+    long_description="README.md",
+    long_description_content_type='text/markdown'
 )
