@@ -9,3 +9,8 @@ All of the described ways to modify the used arguments are also applicable when 
 When using singletons, different parameters will yield different instances, but the same will yield the same.
 
 Everything is thread-safe when the `ClassLoaderFlags.ALL_DEPENDENCIES_AUTOWIRED` is specified. Additionally, this forces you to decorate the whole dependency tree. When using this flag, non-autowired classes raise a `RuntimeError`. To avoid such errors, use `ClassLoaderFlags.IGNORE_POSSIBLE_THREAD_ERRORS`, but it is not recommended. 
+
+Installs via pip:
+```
+pip install smarti
+```
