@@ -1,4 +1,4 @@
-# Smarti - Smart Dependency Injection for python
+# Smarti - Smart Dependency Injection for Python
 
 Just add the `@autowired` decorator to the class you want to autoload. To customize the loaded arguments (e.g., input specific enum value, with the argument name number) add it to the decorator like so `@autowire(number=Enum.one)`.
 
