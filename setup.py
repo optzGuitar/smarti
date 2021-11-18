@@ -1,5 +1,8 @@
 from distutils.core import setup
 
+with open("README.md", 'r') as file:
+    content = file.read()
+
 setup(
     name="smarti",
     version="1.0",
@@ -7,6 +10,6 @@ setup(
     author="optzGuitar",
     url="https://github.com/optzGuitar/smarti",
     packages=["smarti"],
-    long_description="README.md",
+    long_description=content,
     long_description_content_type='text/markdown'
 )
