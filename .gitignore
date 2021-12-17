@@ -140,3 +140,4 @@ cython_debug/
 smarti.code-workspace
 .vscode/
 manual_test.py
+auto_update.sh
