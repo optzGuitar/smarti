@@ -1,11 +1,12 @@
 from distutils.core import setup
+from smarti import __version__ as smarti_version
 
 with open("README.md", 'r') as file:
     content = file.read()
 
 setup(
     name="smarti",
-    version="1.0",
+    version=smarti_version,
     description="A smart and lightweight dependency injector",
     author="optzGuitar",
     url="https://github.com/optzGuitar/smarti",
