@@ -9,6 +9,11 @@ class A:
     pass
 
 
+@autowired(as_singleton=False)
+class Y:
+    pass
+
+
 @autowired(as_singleton=True)
 class AS:
     def __init__(self) -> None:
@@ -23,7 +28,7 @@ class B:
 
 @autowired
 class C:
-    def __init__(self, a1: A, a2: A) -> None:
+    def __init__(self, a1: Y, a2: Y) -> None:
         self.a1 = a1
         self.a2 = a2
 
@@ -97,8 +102,8 @@ def test_correctly_injects_non_singleton():
     instance = C()
 
     assert instance.a1 is not instance.a2
-    assert isinstance(instance.a1, A)
-    assert isinstance(instance.a2, A)
+    assert isinstance(instance.a1, Y)
+    assert isinstance(instance.a2, Y)
 
 
 def test_correctly_injects_singletons():
