@@ -41,7 +41,7 @@ class ClassLoader:
             if name == "self" or name == "return":
                 continue
 
-            if name in kwargs:
+            if f"{name}{cst.DEFAULT_VALUE}" in kwargs:
                 args.append(kwargs[name])
                 continue
 
@@ -97,7 +97,7 @@ class ClassLoader:
     def _get_kwargs_for_argument(
         self, name: str, kwargs: Dict[str, Any]
     ) -> Dict[str, Any]:
-        kwa = kwargs.get(f"{name}_kwargs", None)
+        kwa = kwargs.get(name, None)
 
         if not kwa:
             return {}
