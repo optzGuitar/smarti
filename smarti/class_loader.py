@@ -97,7 +97,7 @@ class ClassLoader:
     def _get_kwargs_for_argument(
         self, name: str, kwargs: Dict[str, Any]
     ) -> Dict[str, Any]:
-        kwa = kwargs.get(f"{name}_kwargs", None)
+        kwa = kwargs.get(f"{name}{cst.KWARGS_VALUE}", None)
 
         if not kwa:
             return {}

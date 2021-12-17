@@ -1,24 +1,25 @@
-from typing import Optional, Type
+from typing import Optional, Type, TypeVar
 import smarti.class_loader as cl
 import smarti.constants as cst
 
 GLOBAL_CLASSLOADER = cl.ClassLoader()
+T = TypeVar("T")
 
 
 def autowired(
-    class_: Type = None,
-    as_singleton: bool = False,
+    class_: Type[T] = None,
+    as_singleton: bool = True,
     class_loader: Optional[cl.ClassLoader] = None,
     **kwargs
 ):
-    def decorator(decorated_class: Type):
+    def decorator(decorated_class: Type[T]):
         used_class_loader = GLOBAL_CLASSLOADER if class_loader is None else class_loader
         annotation_args = kwargs
 
-        def __new__(cls, *args, **kwargs):
+        def __new__(cls, *args, **kwargs) -> T:
             if as_singleton:
                 existing_instance = used_class_loader._instance_storage.get_instance(
-                    decorated_class, args, kwargs
+                    decorated_class, list(args), kwargs
                 )
                 if existing_instance:
                     return existing_instance
@@ -47,8 +48,8 @@ def autowired(
 
         setattr(decorated_class, cst.UNMODIFIED_INIT, decorated_class.__init__)
         setattr(decorated_class, cst.UNMODIFIED_NEW, decorated_class.__new__)
-        decorated_class.__init__ = __init__
-        decorated_class.__new__ = __new__
+        decorated_class.__init__ = __init__  # type: ignore
+        decorated_class.__new__ = __new__  # type: ignore
 
         dont_add = (
             kwargs[cst.DONT_ADD_TO_KNOWN] if cst.DONT_ADD_TO_KNOWN in kwargs else False
