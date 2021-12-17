@@ -1,7 +1,7 @@
 from smarti import autowired
 
 
-@autowired(db_default="main")
+@autowired(db="main")
 class ServiceA:
     def __init__(self, db: str) -> None:
         pass
