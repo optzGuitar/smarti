@@ -34,11 +34,13 @@ def autowired(
 
             if not existing_instance:
                 original_init = getattr(decorated_class, cst.UNMODIFIED_INIT)
+                seen_types = kwargs.get(cst.ALREADY_SEEN_TYPES, [])
                 used_class_loader.autowire_function(
                     decorated_class,
                     original_init,
                     self,
                     as_singleton,
+                    seen_types,
                     **{**annotation_args, **kwargs}
                 )
 
@@ -56,7 +58,8 @@ def autowired(
         )
 
         if not dont_add:
-            used_class_loader._check_autowire._known_types.append(decorated_class)
+            used_class_loader._check_autowire._known_types.append(
+                decorated_class)
 
         return decorated_class
 

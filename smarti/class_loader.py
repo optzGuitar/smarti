@@ -1,7 +1,7 @@
 import inspect
 import smarti as sti
 import smarti.constants as cst
-from typing import Any, Callable, Dict, Type, get_type_hints
+from typing import Any, Callable, Dict, List, Type, get_type_hints
 
 from smarti.check_autowire import CheckAutowire
 from smarti.class_loader_flags import ClassLoaderFlags
@@ -28,16 +28,16 @@ class ClassLoader:
         function: Callable,
         self_arg: Any,
         as_singleton: bool,
+        seen_types: List[Type],
         **kwargs,
     ):
         args = [self_arg]
 
-        if not self._check_autowire.can_autowire(function, self._flags, type_):
+        sign = inspect.signature(function)
+        if not self._check_autowire.can_autowire(function, self._flags, type_, seen_types, kwargs):
             raise RuntimeError(f"Cannot Autowire function {function}")
 
-        sign = inspect.signature(function)
-
-        for name, type in get_type_hints(function).items():
+        for name, arg_type in get_type_hints(function).items():
             if name == "self" or name == "return":
                 continue
 
@@ -48,28 +48,32 @@ class ClassLoader:
             if sign.parameters[name].default is not inspect.Parameter.empty:
                 continue
 
-            if not self._check_autowire.can_autowire_type(type):
-                raise RuntimeError(f"Cannot Autowire {name}: {type} of {function}")
+            if not self._check_autowire.can_autowire_type(arg_type):
+                raise RuntimeError(
+                    f"Cannot Autowire {name}: {arg_type} of {function}")
 
-            args.append(self._instantiate_class(type, name, kwargs, as_singleton))
+            args.append(self._instantiate_class(
+                arg_type, name, kwargs, as_singleton, [*seen_types, arg_type]))
 
         function(*args)
 
     def _instantiate_class(
-        self, type: Type, name: str, kwargs: Dict[str, Any], as_singleton: bool
+        self, type: Type, name: str, kwargs: Dict[str, Any], as_singleton: bool, seen_types: List[Type]
     ) -> Any:
         class_ = self._load_class_type(type)
 
         if self._check_autowire.is_autowired(class_):
             custom_args = self._get_kwargs_for_argument(name, kwargs)
-            instance = class_(**custom_args)
+            instance = class_(
+                **{**custom_args, cst.ALREADY_SEEN_TYPES: seen_types})
         else:
-            instance = self._recursive_instantiate(class_, as_singleton, name, kwargs)
+            instance = self._recursive_instantiate(
+                class_, as_singleton, name, kwargs, seen_types)
 
         return instance
 
     def _recursive_instantiate(
-        self, class_: Type, as_singleton: bool, name: str, kwargs: Dict[str, Any]
+        self, class_: Type, as_singleton: bool, name: str, kwargs: Dict[str, Any], seen_types: List[Type],
     ) -> Any:
         custom_args = self._get_kwargs_for_argument(name, kwargs)
 
@@ -82,7 +86,8 @@ class ClassLoader:
         class_ = sti.autowired(
             class_, as_singleton, self, **{cst.DONT_ADD_TO_KNOWN: True}
         )
-        instance = class_(**custom_args)
+        instance = class_(
+            **{**custom_args, cst.ALREADY_SEEN_TYPES: seen_types})
 
         class_.__init__ = getattr(class_, cst.UNMODIFIED_INIT)
         class_.__new__ = getattr(class_, cst.UNMODIFIED_NEW)
