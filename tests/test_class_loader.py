@@ -172,6 +172,6 @@ def test_can_load_default_args():
 
 
 def test_throws_on_cyclic_dependencies():
-    import tests.cyclic_classes.a as cca
+    import tests.cyclic_classes as cc
     with pytest.raises(CyclicDependencyException):
-        cca.A()
+        cc.A()
