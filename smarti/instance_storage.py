@@ -70,7 +70,7 @@ class InstanceStorage:
         for i, (name, param) in enumerate(params):
             if param.kind == inspect.Parameter.VAR_POSITIONAL:
                 args.append((name, *arguments[i:]))
-                break
+                continue
             elif param.kind == inspect.Parameter.VAR_KEYWORD:
                 continue
 

@@ -49,7 +49,7 @@ class ClassLoader:
                 continue
 
             if not self._check_autowire.can_autowire_type(arg_type):
-                raise RuntimeError(
+                raise TypeError(
                     f"Cannot Autowire {name}: {arg_type} of {function}")
 
             args.append(self._instantiate_class(
