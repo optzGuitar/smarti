@@ -1,8 +1,12 @@
 from smarti import autowired
 from smarti.class_loader import ClassLoader
 from smarti.class_loader_flags import ClassLoaderFlags
+import pytest
 
-multithread_classloader = ClassLoader(ClassLoaderFlags.ALL_DEPENDENCIES_AUTOWIRED)
+from smarti.exceptions import CyclicDependencyException
+
+multithread_classloader = ClassLoader(
+    ClassLoaderFlags.ALL_DEPENDENCIES_AUTOWIRED)
 
 
 class A:
@@ -165,3 +169,9 @@ def test_can_load_default_args():
     instance = K()
 
     assert instance.s == "123"
+
+
+def test_throws_on_cyclic_dependencies():
+    import tests.cyclic_classes as cc
+    with pytest.raises(CyclicDependencyException):
+        cc.A()

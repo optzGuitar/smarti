@@ -13,7 +13,7 @@ def test_add_instance():
 
     storage.add_or_get(Testclass, instance, args, {"a": "b"})
     key = storage._generate_key(
-        "test_instance_storage", "Testclass", Testclass, args, {"a": "b"}
+        "tests.test_instance_storage", "Testclass", Testclass, args, {"a": "b"}
     )
     assert storage._storage[key] == instance
 
@@ -28,7 +28,7 @@ def test_get_instance():
     instance = Testclass()
 
     key = storage._generate_key(
-        "test_instance_storage", "Testclass", Testclass, args, {"a": "b"}
+        "tests.test_instance_storage", "Testclass", Testclass, args, {"a": "b"}
     )
     storage._storage[key] = instance
 
@@ -41,7 +41,8 @@ def test_get_instance():
 
 
 def test_generate_key():
-    expected = ("a.B", ("args", 1, 2, 3), ("a", "x"), ("f_kwargs", ("x", "bla")))
+    expected = ("a.B", ("args", 1, 2, 3), ("a", "x"),
+                ("f_kwargs", ("x", "bla")))
     storage = InstanceStorage()
 
     generated = storage._generate_key(
