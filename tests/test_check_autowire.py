@@ -3,6 +3,8 @@ from smarti.check_autowire import CheckAutowire
 from smarti.class_loader_flags import ClassLoaderFlags
 import pytest
 
+from smarti.exceptions import CyclicDependencyException
+
 
 class B:
     pass
@@ -135,7 +137,7 @@ def test_correctly_ignores_special_arguments():
 def test_cyclic_dependency_check():
     checker = CheckAutowire()
 
-    with pytest.raises(TypeError):
+    with pytest.raises(CyclicDependencyException):
         checker.can_autowire(Y.__init__, ClassLoaderFlags.NO_FLAGS, Y, [B], {})
 
     checker.can_autowire(

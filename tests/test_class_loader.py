@@ -3,6 +3,8 @@ from smarti.class_loader import ClassLoader
 from smarti.class_loader_flags import ClassLoaderFlags
 import pytest
 
+from smarti.exceptions import CyclicDependencyException
+
 multithread_classloader = ClassLoader(
     ClassLoaderFlags.ALL_DEPENDENCIES_AUTOWIRED)
 
@@ -171,5 +173,5 @@ def test_can_load_default_args():
 
 def test_throws_on_cyclic_dependencies():
     import tests.cyclic_classes.a as cca
-    with pytest.raises(TypeError):
+    with pytest.raises(CyclicDependencyException):
         cca.A()

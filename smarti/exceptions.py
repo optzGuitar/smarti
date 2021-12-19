@@ -1,0 +1,2 @@
+class CyclicDependencyException(Exception):
+    pass

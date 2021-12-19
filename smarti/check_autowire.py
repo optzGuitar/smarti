@@ -4,6 +4,7 @@ from typing import Callable, List, Type, get_type_hints, Any, Dict
 import enum
 
 from smarti.class_loader_flags import ClassLoaderFlags
+from smarti.exceptions import CyclicDependencyException
 
 
 class CheckAutowire:
@@ -25,7 +26,7 @@ class CheckAutowire:
                 circle = [
                     t_.__name__ for t_ in seen_types[seen_types.index(param_type):] + [param_type]
                 ]
-                raise TypeError(
+                raise CyclicDependencyException(
                     f"Found cyclic dependencies: {' -> '.join(circle)}")
 
         problems = {
