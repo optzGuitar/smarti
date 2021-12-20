@@ -1,8 +1,11 @@
 from distutils.core import setup
 from smarti import __version__ as smarti_version
 
-with open("README.md", 'r') as file:
-    content = file.read()
+try:
+    with open("README.md", 'r') as file:
+        content = file.read()
+except Exception:
+    content = "A smart and lightweight dependency injector, supporting singletons and different containers."
 
 setup(
     name="smarti",
