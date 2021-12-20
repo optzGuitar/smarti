@@ -4,7 +4,7 @@ from smarti import __version__ as smarti_version
 try:
     with open("README.md", 'r') as file:
         content = file.read()
-except Exception:
+except FileNotFoundError:
     content = "A smart and lightweight dependency injector, supporting singletons and different containers."
 
 setup(
