@@ -12,6 +12,13 @@ def autowired(
     class_loader: Optional[cl.ClassLoader] = None,
     **kwargs
 ):
+    """The main decorator of this package. It allows to autowire classes by decorating them. It also supports singletons and custom class loader!
+
+    Args:
+        class_ (Type[T], optional): The class, typically inserted by python itself using the decorator syntax. Defaults to None.
+        as_singleton (bool, optional): True if this class should be loaded as a singleton, False otherwise. Defaults to True.
+        class_loader (Optional[cl.ClassLoader], optional): The custom class loader. If None smarti.decorator.GLOBAL_CLASSLOADER will be used. Defaults to None.
+    """
     def decorator(decorated_class: Type[T]):
         used_class_loader = GLOBAL_CLASSLOADER if class_loader is None else class_loader
         annotation_args = kwargs

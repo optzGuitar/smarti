@@ -1,5 +1,5 @@
 from __future__ import annotations
-from smarti.annotations import autowired
+from smarti.decorator import autowired
 
 
 @autowired
