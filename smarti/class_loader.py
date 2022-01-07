@@ -109,8 +109,7 @@ class ClassLoader:
 
         if self._check_autowire.is_autowired(class_):
             custom_args = self._get_kwargs_for_argument(name, kwargs)
-            instance = class_(
-                **{**custom_args, cst.ALREADY_SEEN_TYPES: seen_types})
+            instance = self._create_instance(class_, custom_args, seen_types)
         else:
             instance = self._recursive_instantiate(
                 class_, as_singleton, name, kwargs, seen_types)
@@ -146,13 +145,19 @@ class ClassLoader:
         class_ = sti.autowired(
             class_, as_singleton, self, **{cst.DONT_ADD_TO_KNOWN: True}
         )
-        instance = class_(
-            **{**custom_args, cst.ALREADY_SEEN_TYPES: seen_types})  # type: ignore
+        instance = self._create_instance(class_, custom_args, seen_types)
 
         class_.__init__ = getattr(class_, cst.UNMODIFIED_INIT)  # type: ignore
         class_.__new__ = getattr(class_, cst.UNMODIFIED_NEW)  # type: ignore
 
         return instance
+
+    def _create_instance(self, type_: Type[T], custom_args: Dict[str, Any], seen_types: List[Type]) -> T:
+        try:
+            return type_(
+                **{**custom_args, cst.ALREADY_SEEN_TYPES: seen_types})  # type: ignore
+        except TypeError as e:
+            raise TypeError(f"Cannot create {type_} with custom args {custom_args} and dependency chain {seen_types}") from e
 
     def _load_class_type(self, type: Type) -> Any:
         """Gets the type of a type.

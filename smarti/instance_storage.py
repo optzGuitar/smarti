@@ -116,6 +116,18 @@ class InstanceStorage:
 
             args.append((name, pickle.dumps(arguments[i])))
 
-        key = tuple([f"{module}.{classname}", *args, pickle.dumps(kwargs)])
+        try:
+            kw_arg_hashable = pickle.dumps(kwargs)
+        except TypeError:
+            tmp_args: List[Any] = []
+            for k, v in kwargs.items():  # type: ignore
+                try:
+                    tmp_args.append(pickle.dumps((k, v)))
+                except TypeError:
+                    tmp_args.append((k, v))
+
+            kw_arg_hashable = tuple(tmp_args)  # type: ignore
+
+        key = tuple([f"{module}.{classname}", *args, kw_arg_hashable])
 
         return key
