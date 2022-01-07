@@ -13,6 +13,7 @@ def autowired(
     **kwargs
 ):
     """The main decorator of this package. It allows to autowire classes by decorating them. It also supports singletons and custom class loader!
+    If positional arguments are present, the whole autowireing is skipped to enable backwards compatability.
 
     Args:
         class_ (Type[T], optional): The class, typically inserted by python itself using the decorator syntax. Defaults to None.
@@ -34,7 +35,12 @@ def autowired(
             original_new = getattr(decorated_class, cst.UNMODIFIED_NEW)
             return original_new(cls)
 
-        def __init__(self, **kwargs) -> None:
+        def __init__(self, *args, **kwargs) -> None:
+            if args:
+                original_init = getattr(decorated_class, cst.UNMODIFIED_INIT)
+                original_init(*args)
+                return
+
             existing_instance = None
             if as_singleton:
                 existing_instance = used_class_loader._instance_storage.get_instance(
