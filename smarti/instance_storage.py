@@ -1,6 +1,7 @@
 from typing import Any, Dict, List, Optional, Tuple, Type, TypeVar
 import inspect
 from threading import Lock
+import pickle
 from smarti import constants as cst
 
 T = TypeVar("T")
@@ -102,38 +103,19 @@ class InstanceStorage:
         Returns:
             Tuple: The key for the local instance storage.
         """
-        extra = self.__convert_dict_to_tuples(kwargs) \
-            if kwargs is not None else None
         sig = inspect.signature(type_.__init__)
         params = [i for i in sig.parameters.items() if i[0] != 'self']
         args = []
 
         for i, (name, param) in enumerate(params):
             if param.kind == inspect.Parameter.VAR_POSITIONAL:
-                args.append((name, *arguments[i:]))
+                args.append((name, pickle.dumps(arguments[i:])))
                 continue
             elif param.kind == inspect.Parameter.VAR_KEYWORD:
                 continue
 
-            args.append((name, arguments[i]))
+            args.append((name, pickle.dumps(arguments[i])))
 
-        key = tuple([f"{module}.{classname}", *args])
-        if extra is not None:
-            key += extra
+        key = tuple([f"{module}.{classname}", *args, pickle.dumps(kwargs)])
 
         return key
-
-    def __convert_dict_to_tuples(self, data: Dict) -> Tuple:
-        """Converts a dict to tuples.
-
-        Args:
-            data (Dict): The dict to convert to tuples.
-
-        Returns:
-            Tuple: The converted dict.
-        """
-        converted = [
-            (k, v if not isinstance(v, dict) else self.__convert_dict_to_tuples(v))
-            for k, v in data.items() if k not in InstanceStorage.IGNORED_ARGUMENTS
-        ]
-        return converted[0] if len(converted) == 1 else tuple(converted)

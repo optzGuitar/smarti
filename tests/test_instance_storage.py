@@ -41,8 +41,14 @@ def test_get_instance():
 
 
 def test_generate_key():
-    expected = ("a.B", ("args", 1, 2, 3), ("a", "x"),
-                ("f_kwargs", ("x", "bla")))
+    expected = (
+        "a.B",
+        (
+            "args",
+            b"\x80\x04\x95\x0b\x00\x00\x00\x00\x00\x00\x00]\x94(K\x01K\x02K\x03e.",
+        ),
+        b"\x80\x04\x95#\x00\x00\x00\x00\x00\x00\x00}\x94(\x8c\x01a\x94\x8c\x01x\x94\x8c\x08f_kwargs\x94}\x94h\x02\x8c\x03bla\x94su.",
+    )
     storage = InstanceStorage()
 
     generated = storage._generate_key(

@@ -35,9 +35,11 @@ def autowired(
             return original_new(cls)
 
         def __init__(self, **kwargs) -> None:
-            existing_instance = used_class_loader._instance_storage.get_instance(
-                decorated_class, [], kwargs
-            )
+            existing_instance = None
+            if as_singleton:
+                existing_instance = used_class_loader._instance_storage.get_instance(
+                    decorated_class, [], kwargs
+                )
 
             if not existing_instance:
                 original_init = getattr(decorated_class, cst.UNMODIFIED_INIT)
