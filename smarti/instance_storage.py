@@ -1,4 +1,5 @@
 from typing import Any, Dict, List, Optional, Tuple, Type, TypeVar
+from collections.abc import Iterable
 import inspect
 from threading import Lock
 import pickle
@@ -109,25 +110,29 @@ class InstanceStorage:
 
         for i, (name, param) in enumerate(params):
             if param.kind == inspect.Parameter.VAR_POSITIONAL:
-                args.append((name, pickle.dumps(arguments[i:])))
+                args.append((name, self.__pickle_recursively([arguments[i:]])))
                 continue
             elif param.kind == inspect.Parameter.VAR_KEYWORD:
                 continue
 
-            args.append((name, pickle.dumps(arguments[i])))
+            args.append((name, self.__pickle_recursively(arguments[i])))
 
-        try:
-            kw_arg_hashable = pickle.dumps(kwargs)
-        except TypeError:
-            tmp_args: List[Any] = []
-            for k, v in kwargs.items():  # type: ignore
-                try:
-                    tmp_args.append(pickle.dumps((k, v)))
-                except TypeError:
-                    tmp_args.append((k, v))
-
-            kw_arg_hashable = tuple(tmp_args)  # type: ignore
-
-        key = tuple([f"{module}.{classname}", *args, kw_arg_hashable])
+        key = tuple([f"{module}.{classname}", *args, self.__pickle_recursively(kwargs)])
 
         return key
+
+    def __pickle_recursively(self, data: Any):
+        if isinstance(data, Iterable) and not isinstance(data, bytes) and not isinstance(data, str):
+            d_list = []
+            for item in data:
+                if isinstance(data, dict):
+                    d_list.append((self.__pickle_recursively(item), self.__pickle_recursively(data[item])))
+                else:
+                    d_list.append(self.__pickle_recursively(item))
+
+            return pickle.dumps(d_list)
+
+        try:
+            return pickle.dumps(data)
+        except TypeError:
+            return hash(data)

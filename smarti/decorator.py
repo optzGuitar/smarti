@@ -38,7 +38,7 @@ def autowired(
         def __init__(self, *args, **kwargs) -> None:
             if args:
                 original_init = getattr(decorated_class, cst.UNMODIFIED_INIT)
-                original_init(*args)
+                original_init(self, *args)
                 return
 
             existing_instance = None
