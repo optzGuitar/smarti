@@ -125,6 +125,8 @@ class InstanceStorage:
                     tmp_args.append(pickle.dumps((k, v)))
                 except TypeError:
                     tmp_args.append((k, v))
+                except AttributeError:
+                    tmp_args.append((k, v))
 
             kw_arg_hashable = tuple(tmp_args)  # type: ignore
 
