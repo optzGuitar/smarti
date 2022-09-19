@@ -1,8 +1,8 @@
-from typing import Any, Dict, List, Optional, Tuple, Type, TypeVar
-from collections.abc import Iterable
 import inspect
-from threading import Lock
 import pickle
+from threading import Lock
+from typing import Any, Dict, List, Optional, Tuple, Type, TypeVar
+
 from smarti import constants as cst
 
 T = TypeVar("T")
@@ -110,32 +110,28 @@ class InstanceStorage:
 
         for i, (name, param) in enumerate(params):
             if param.kind == inspect.Parameter.VAR_POSITIONAL:
-                args.append((name, self.__pickle_recursively([arguments[i:]])))
+                args.append((name, pickle.dumps(arguments[i:])))
                 continue
             elif param.kind == inspect.Parameter.VAR_KEYWORD:
                 continue
 
-            args.append((name, self.__pickle_recursively(arguments[i])))
-
-        key = tuple([f"{module}.{classname}", *args, self.__pickle_recursively(kwargs)])
-
-        return key
-
-    def __pickle_recursively(self, data: Any):
-        if isinstance(data, Iterable) and not isinstance(data, bytes) and not isinstance(data, str):
-            d_list = []
-            for item in data:
-                if isinstance(data, dict):
-                    d_list.append((self.__pickle_recursively(item), self.__pickle_recursively(data[item])))
-                else:
-                    d_list.append(self.__pickle_recursively(item))
-
-            return pickle.dumps(d_list)
+            args.append((name, pickle.dumps(arguments[i])))
 
         try:
-            return pickle.dumps(data)
-        except pickle.PicklingError:
-            try:
-                return hash(data)
-            except:
-                return str(data)
+            kw_arg_hashable = pickle.dumps(kwargs)
+        except (TypeError, pickle.PicklingError):
+            tmp_args: List[Any] = []
+            for k, v in kwargs.items():  # type: ignore
+                try:
+                    tmp_args.append(pickle.dumps((k, v)))
+                except (TypeError, AttributeError):
+                    try:
+                        tmp_args.append(hash((k, v)))
+                    except:
+                        tmp_args.append(str((k, v)))
+
+            kw_arg_hashable = tuple(tmp_args)  # type: ignore
+
+        key = tuple([f"{module}.{classname}", *args, kw_arg_hashable])
+
+        return key
