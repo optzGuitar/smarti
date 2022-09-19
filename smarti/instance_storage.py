@@ -134,5 +134,8 @@ class InstanceStorage:
 
         try:
             return pickle.dumps(data)
-        except TypeError:
-            return hash(data)
+        except pickle.PicklingError:
+            try:
+                return hash(data)
+            except:
+                return str(data)
