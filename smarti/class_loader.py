@@ -1,4 +1,5 @@
 import inspect
+import asyncio
 import smarti as sti
 import smarti.constants as cst
 from typing import Any, Callable, Dict, List, Optional, Type, get_type_hints, TypeVar
@@ -88,7 +89,16 @@ class ClassLoader:
             args.append(self._instantiate_class(
                 arg_type, name, kwargs, as_singleton, [*seen_types, arg_type]))
 
-        function(*args)
+        # Support both sync and async callables
+        if inspect.iscoroutinefunction(function):
+            try:
+                asyncio.run(function(*args))
+            except RuntimeError as e:
+                raise RuntimeError(
+                    "Cannot run async function during autowiring inside a running event loop"
+                ) from e
+        else:
+            function(*args)
 
     def _instantiate_class(
         self, type: Type[T], name: str, kwargs: Dict[str, Any], as_singleton: bool, seen_types: List[Type]
