@@ -4,6 +4,7 @@ from smarti.class_loader_flags import ClassLoaderFlags
 import pytest
 
 from smarti.exceptions import CyclicDependencyException
+import asyncio
 
 multithread_classloader = ClassLoader(
     ClassLoaderFlags.ALL_DEPENDENCIES_AUTOWIRED)
@@ -175,3 +176,22 @@ def test_throws_on_cyclic_dependencies():
     import tests.cyclic_classes as cc
     with pytest.raises(CyclicDependencyException):
         cc.A()
+
+
+@autowired
+class AsyncInitClass:
+    async def __init__(self, a: A) -> None:
+        await asyncio.sleep(0)
+        self.a = a
+
+
+def test_supports_async_init_outside_event_loop():
+    instance = AsyncInitClass()
+    assert isinstance(instance.a, A)
+
+
+def test_async_init_inside_running_event_loop_raises():
+    async def main():
+        with pytest.raises(RuntimeError):
+            AsyncInitClass()
+    asyncio.run(main())

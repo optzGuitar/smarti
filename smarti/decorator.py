@@ -1,4 +1,5 @@
 from typing import Optional, Type, TypeVar
+import inspect
 import smarti.class_loader as cl
 import smarti.constants as cst
 
@@ -38,6 +39,10 @@ def autowired(
         def __init__(self, *args, **kwargs) -> None:
             if args:
                 original_init = getattr(decorated_class, cst.UNMODIFIED_INIT)
+                if inspect.iscoroutinefunction(original_init):
+                    raise RuntimeError(
+                        "Cannot call async __init__ with positional args; autowiring is disabled in this mode"
+                    )
                 original_init(self, *args)
                 return
 
